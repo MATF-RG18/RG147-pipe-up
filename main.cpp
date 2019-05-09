@@ -6,6 +6,9 @@
 #include<GL/glut.h>
 #include<cmath>
 
+
+#define PI 3.14159265
+
 int index = 0;
 void draw_grids(){
 glBegin(GL_LINES);
@@ -21,10 +24,12 @@ glBegin(GL_LINES);
 glEnd();	
 }
 
+void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle);
+
 class Pipe{
 	private:
 		GLUquadric * qobj = gluNewQuadric();
-		GLfloat xtrans,ytrans,ztrans,angleRange,angle;
+		GLfloat xtrans,ytrans,ztrans,angleRange,angle=0;
 		
 	public:
 		
@@ -47,10 +52,10 @@ class Pipe{
 		void drawPipe(){
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
-				glRotatef(angle,0,0,1);
-				
-				glRotatef(90,-1,0,0);
 				glTranslatef(xtrans,ytrans,ztrans);
+				glRotatef(angle,0,0,-1);	
+				glRotatef(90,-1,0,0);
+
 				gluCylinder(qobj, .1,.1,1, 20,16);
 				
 			glPopMatrix();
@@ -65,25 +70,29 @@ class Pipe{
 		    	return ztrans;
 		}
 		
+		void stop(){
+			if(abs((int)angle)<angleRange){
+				std::cout<<angle<<" "<<xtrans<<" "<<sin(angle)<<" "<<ytrans<<" "<<cos(angle)<<std::endl;
+				make_new_pipe(xtrans+sin(angle*PI/180),ytrans+abs(cos(angle*PI/180)),0,40);
+				
+			}
+
+		}
 		
 };
 std::vector<Pipe> gandra;
 
-void drawTwoLines(GLfloat x, GLfloat y, GLfloat z, GLfloat range){
-	glPushMatrix();
-		glColor3f(0,1,1);
-		glBegin(GL_LINES);
-			glVertex3f(x,y,z);
-			glVertex3f(x+sin(range),y+cos(range),z);
-		glEnd();
-	glPopMatrix();
+void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle){
+	gandra.push_back(Pipe(x,y,z,angle));
+	index++;
+
 }
+
 void rotation(int index){
 	GLfloat rang = gandra[index].getRange();
 	GLfloat xcord = gandra[index].getx();
 	GLfloat ycord = gandra[index].gety();
 	GLfloat zcord = gandra[index].getz();
-	drawTwoLines(xcord,ycord,zcord,rang);
 	GLfloat currAngle = gandra[index].getCurrentAngle();
 	if(abs((int)(currAngle))>90){
 		gandra[index].direction = !gandra[index].direction;
@@ -97,13 +106,16 @@ void rotation(int index){
 		else gandra[index].setAngle(currAngle-1);
 	}
 	
-	
-	glutPostRedisplay();
-	
-	//glutTimerFunc(100,rotation,index);
-	
+	glutPostRedisplay();	
 }
+void keeb(unsigned char key,int x, int y){
+	switch(key){
+		case 32:
+			gandra[index].stop();
 
+	}
+
+}
 
 void display(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -117,7 +129,7 @@ void display(){
 	
 	glMatrixMode(GL_MODELVIEW); 
 	glLoadIdentity(); 
-	gluLookAt(0,1,5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	gluLookAt(gandra[index].getx(),gandra[index].gety(),4,gandra[index].getx(),gandra[index].gety(),0, 0.0, 1.0, 0.0);
 	for(auto it: gandra)
 		it.drawPipe();
 	 
@@ -135,6 +147,7 @@ int main(int argc, char** argv){
 	glEnable(GL_DEPTH_TEST);
 	//callbacks
 	glutDisplayFunc(display);
+	glutKeyboardFunc(keeb);
 	gandra.push_back(Pipe(0,0,0,30));
 	
 	glutMainLoop();
