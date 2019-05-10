@@ -8,7 +8,7 @@
 
 
 #define PI 3.14159265
-
+bool kameraflag=true;
 int index = 0;
 void draw_grids(){
 glBegin(GL_LINES);
@@ -28,6 +28,8 @@ void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle);
 
 class Pipe{
 	private:
+		GLfloat momentum = (float)(rand()%35+35)/100+index;
+		int thisIndex;
 		GLUquadric * qobj = gluNewQuadric();
 		GLfloat xtrans,ytrans,ztrans,angleRange,angle=0;
 		
@@ -39,6 +41,7 @@ class Pipe{
 			ytrans=y;
 			ztrans=z;
 			angleRange = rang;
+			thisIndex=index;
 		}
 		void setAngle(GLfloat anglendo){
 			angle = anglendo;
@@ -49,9 +52,27 @@ class Pipe{
 		GLfloat getCurrentAngle(){
 			return angle;
 		}
+		GLfloat getMomentum(){
+			return momentum;
+		}
 		void drawPipe(){
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
+				if(thisIndex==index){
+				glPushMatrix();
+					glBegin(GL_LINES);
+						glColor3f(0,1,0);
+						glVertex3f(xtrans,ytrans,ztrans-1);
+						glVertex3f(xtrans-sin(angleRange*PI/180),ytrans+1.4,ztrans-1);
+						
+					glEnd();
+					glBegin(GL_LINES);
+						glVertex3f(xtrans,ytrans,ztrans-1);
+						glVertex3f(xtrans+sin(angleRange*PI/180),ytrans+1.4,ztrans-1);
+					glEnd();
+				glPopMatrix();
+				}
+				glColor3f(0,0,1);
 				glTranslatef(xtrans,ytrans,ztrans);
 				glRotatef(angle,0,0,-1);	
 				glRotatef(90,-1,0,0);
@@ -72,47 +93,53 @@ class Pipe{
 		
 		void stop(){
 			if(abs((int)angle)<angleRange){
-				std::cout<<angle<<" "<<xtrans<<" "<<sin(angle)<<" "<<ytrans<<" "<<cos(angle)<<std::endl;
-				make_new_pipe(xtrans+sin(angle*PI/180),ytrans+abs(cos(angle*PI/180)),0,40);
+				make_new_pipe(xtrans+sin(angle*PI/180),ytrans+abs(cos(angle*PI/180)),0,90-10*index);
 				
 			}
-
+			else{
+				std::cout<< "Igra je zavrsena, vas rezultat: "<<index<<std::endl;
+				exit(0);
+			}
 		}
 		
 };
 std::vector<Pipe> gandra;
 
 void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle){
-	gandra.push_back(Pipe(x,y,z,angle));
+	
 	index++;
+	gandra.push_back(Pipe(x,y,z,angle));
 
 }
 
 void rotation(int index){
-	GLfloat rang = gandra[index].getRange();
-	GLfloat xcord = gandra[index].getx();
-	GLfloat ycord = gandra[index].gety();
-	GLfloat zcord = gandra[index].getz();
+	GLfloat momentum = gandra[index].getMomentum();
 	GLfloat currAngle = gandra[index].getCurrentAngle();
 	if(abs((int)(currAngle))>90){
 		gandra[index].direction = !gandra[index].direction;
 		if (gandra[index].direction)
-			gandra[index].setAngle(currAngle+2);
-		else gandra[index].setAngle(currAngle-2);
+			gandra[index].setAngle(currAngle+momentum);
+		else gandra[index].setAngle(currAngle-momentum);
 	}
 	else{
 		if (gandra[index].direction)
-			gandra[index].setAngle(currAngle+1);
-		else gandra[index].setAngle(currAngle-1);
+			gandra[index].setAngle(currAngle+momentum);
+		else gandra[index].setAngle(currAngle-momentum);
 	}
+	
+
 	
 	glutPostRedisplay();	
 }
 void keeb(unsigned char key,int x, int y){
 	switch(key){
 		case 32:
-			gandra[index].stop();
-
+			if(kameraflag)
+				gandra[index].stop();
+			break;
+		case 27:
+			exit(0);
+			break;
 	}
 
 }
@@ -148,7 +175,7 @@ int main(int argc, char** argv){
 	//callbacks
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keeb);
-	gandra.push_back(Pipe(0,0,0,30));
+	gandra.push_back(Pipe(0,0,0,90));
 	
 	glutMainLoop();
 	return 0;
