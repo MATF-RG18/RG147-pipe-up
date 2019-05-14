@@ -156,6 +156,15 @@ void display(){
 	
 	glMatrixMode(GL_MODELVIEW); 
 	glLoadIdentity(); 
+	glPushMatrix();
+		glBegin(GL_POLYGON);
+			glColor3f(.3,.3,.3);
+			glVertex3f(-100,-1,-100);
+			glVertex3f(-10,-1,+10);
+			glVertex3f(+10,-1,+10);
+			glVertex3f(+10,-1,-10);
+		glEnd();
+	glPopMatrix();
 	gluLookAt(gandra[index].getx(),gandra[index].gety(),4,gandra[index].getx(),gandra[index].gety(),0, 0.0, 1.0, 0.0);
 	for(auto it: gandra)
 		it.drawPipe();
