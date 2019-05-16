@@ -8,7 +8,8 @@
 
 
 #define PI 3.14159265
-bool kameraflag=true;
+
+GLfloat camx,camy,camz;
 int index = 0;
 void draw_grids(){
 glBegin(GL_LINES);
@@ -72,7 +73,7 @@ class Pipe{
 					glEnd();
 				glPopMatrix();
 				}
-				glColor3f(0,0,1);
+				glColor3f(0,.2,.8);
 				glTranslatef(xtrans,ytrans,ztrans);
 				glRotatef(angle,0,0,-1);	
 				glRotatef(90,-1,0,0);
@@ -99,6 +100,7 @@ class Pipe{
 			else{
 				std::cout<< "Igra je zavrsena, vas rezultat: "<<index<<std::endl;
 				exit(0);
+				
 			}
 		}
 		
@@ -113,6 +115,9 @@ void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle){
 }
 
 void rotation(int index){
+	camx = gandra[index].getx();
+	camy = gandra[index].gety();
+	camz = gandra[index].getz();
 	GLfloat momentum = gandra[index].getMomentum();
 	GLfloat currAngle = gandra[index].getCurrentAngle();
 	if(abs((int)(currAngle))>90){
@@ -134,7 +139,7 @@ void rotation(int index){
 void keeb(unsigned char key,int x, int y){
 	switch(key){
 		case 32:
-			if(kameraflag)
+			
 				gandra[index].stop();
 			break;
 		case 27:
@@ -152,20 +157,50 @@ void display(){
 	draw_grids();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity(); 
-	gluPerspective(50.0, 1.0, 3.0, 7.0); 
+	gluPerspective(50.0, 1.0, 3.0, 100.0);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	GLfloat ambientLight[] = {0.2,0.2,0.2,1};
+	GLfloat diffuseLight[] = {0.8,0.8,0.8,1};
+	GLfloat specularLight[]= {1,1,1,1};
+
+	GLfloat ambient_coeffs[] = { 0.3, 0.7, 0.3, 1 };
+    GLfloat diffuse_coeffs[] = { 0.2, 1, 0.2, 1 };
+    GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
+	GLfloat shininess = 30;
+
+	glLightfv(GL_LIGHT0,GL_AMBIENT,ambientLight);
+	glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuseLight);
+	glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,1);
+	glEnable(GL_COLOR_MATERIAL);
+
+	GLfloat lightPos[] = {0,20,8,1};
+	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+
+	
+
 	
 	glMatrixMode(GL_MODELVIEW); 
-	glLoadIdentity(); 
 	glPushMatrix();
 		glBegin(GL_POLYGON);
 			glColor3f(.3,.3,.3);
-			glVertex3f(-100,-1,-100);
-			glVertex3f(-10,-1,+10);
-			glVertex3f(+10,-1,+10);
-			glVertex3f(+10,-1,-10);
+			glVertex3f(-100,0,-100);
+			glVertex3f(-100,0,+100);
+			glVertex3f(+100,0,+100);
+			glVertex3f(+100,0,-100);
 		glEnd();
 	glPopMatrix();
-	gluLookAt(gandra[index].getx(),gandra[index].gety(),4,gandra[index].getx(),gandra[index].gety(),0, 0.0, 1.0, 0.0);
+	glLoadIdentity(); 
+	
+	gluLookAt(camx,camy,4,camx,camy,0, 0.0, 1.0, 0.0);
 	for(auto it: gandra)
 		it.drawPipe();
 	 
