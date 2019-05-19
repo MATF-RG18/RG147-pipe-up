@@ -1,19 +1,11 @@
 # Pipe up
 
-[23.2.2019] - projekat prelazi na jezik C++
+Pipe up je igra u kojoj je cilj napraviti sto vecu kulu od cevi.
 
-## Uvod
+Cev se okrece oko pocetne tacke i treba je zaustaviti u odredjenom opsegu oznacenom s dve linije. Brzina i ugao variraju.
 
-Pipe up je projekat-igra u okviru kursa Racunarska grafika
+Pritiskom na SPACE zaustavlja se cev
 
-## [10.5.2019]
+Pritiskom na ESC se izlazi iz programa
 
-Napravljena cev, random brzine koja se povecava sa rastom kule
-Napravljene linije u okviru kojih treba zaustaviti cev
-Neuspeh - izlazak sa stampanjem rezultata
-
-### TODO:
-    * Setanje kamere ka novoj cevi:
-        * Nemogucnost zaustavljanja cevi do kraja animacije
-    * Shaders
 
