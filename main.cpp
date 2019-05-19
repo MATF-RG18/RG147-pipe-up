@@ -6,11 +6,12 @@
 #include<GL/glut.h>
 #include<cmath>
 
-
+//konstanta pi za uglove
 #define PI 3.14159265
 
 GLfloat camx,camy,camz;
-int index = 0;
+int index = 0; //globalni indeks - koja cev se trenutno obradjuje
+//funkcija za crtanje koordinatnog sistema
 void draw_grids(){
 glBegin(GL_LINES);
 			glColor3f(1,0,0);
@@ -24,19 +25,21 @@ glBegin(GL_LINES);
 			glVertex3f(0,0,0);
 glEnd();	
 }
-
+//deklaracija funkcije za pravljenje nove cevi
 void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle);
 
+//klasa pipe:
 class Pipe{
 	private:
-		GLfloat momentum = (float)(rand()%35+35)/100+index;
-		int thisIndex;
+		
+		GLfloat momentum = (float)(rand()%35+35)/100+index;				//ubrzanje
+		int thisIndex;													
 		GLUquadric * qobj = gluNewQuadric();
-		GLfloat xtrans,ytrans,ztrans,angleRange,angle=0;
+		GLfloat xtrans,ytrans,ztrans,angleRange,angle=0;				
 		
 	public:
 		
-		bool direction=true;
+		bool direction=true;						
 		Pipe(GLfloat x, GLfloat y, GLfloat z, GLfloat rang){
 			xtrans=x;
 			ytrans=y;
@@ -57,6 +60,7 @@ class Pipe{
 			return momentum;
 		}
 		void drawPipe(){
+			//crtanje cevi i strelica
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 				if(thisIndex==index){
@@ -93,6 +97,7 @@ class Pipe{
 		}
 		
 		void stop(){
+			//handle pritiskanja tastera space
 			if(abs((int)angle)<angleRange){
 				make_new_pipe(xtrans+sin(angle*PI/180),ytrans+abs(cos(angle*PI/180)),0,90-10*index);
 				
@@ -105,31 +110,31 @@ class Pipe{
 		}
 		
 };
-std::vector<Pipe> gandra;
+std::vector<Pipe> pipes;
 
 void make_new_pipe(GLfloat x,GLfloat y,GLfloat z,GLfloat angle){
 	
 	index++;
-	gandra.push_back(Pipe(x,y,z,angle));
+	pipes.push_back(Pipe(x,y,z,angle));
 
 }
 
 void rotation(int index){
-	camx = gandra[index].getx();
-	camy = gandra[index].gety();
-	camz = gandra[index].getz();
-	GLfloat momentum = gandra[index].getMomentum();
-	GLfloat currAngle = gandra[index].getCurrentAngle();
+	camx = pipes[index].getx();
+	camy = pipes[index].gety();
+	camz = pipes[index].getz();
+	GLfloat momentum = pipes[index].getMomentum();
+	GLfloat currAngle = pipes[index].getCurrentAngle();
 	if(abs((int)(currAngle))>90){
-		gandra[index].direction = !gandra[index].direction;
-		if (gandra[index].direction)
-			gandra[index].setAngle(currAngle+momentum);
-		else gandra[index].setAngle(currAngle-momentum);
+		pipes[index].direction = !pipes[index].direction;
+		if (pipes[index].direction)
+			pipes[index].setAngle(currAngle+momentum);
+		else pipes[index].setAngle(currAngle-momentum);
 	}
 	else{
-		if (gandra[index].direction)
-			gandra[index].setAngle(currAngle+momentum);
-		else gandra[index].setAngle(currAngle-momentum);
+		if (pipes[index].direction)
+			pipes[index].setAngle(currAngle+momentum);
+		else pipes[index].setAngle(currAngle-momentum);
 	}
 	
 
@@ -140,7 +145,7 @@ void keeb(unsigned char key,int x, int y){
 	switch(key){
 		case 32:
 			
-				gandra[index].stop();
+				pipes[index].stop();
 			break;
 		case 27:
 			exit(0);
@@ -201,7 +206,7 @@ void display(){
 	glLoadIdentity(); 
 	
 	gluLookAt(camx,camy,4,camx,camy,0, 0.0, 1.0, 0.0);
-	for(auto it: gandra)
+	for(auto it: pipes)
 		it.drawPipe();
 	 
 	glutSwapBuffers();
@@ -219,7 +224,7 @@ int main(int argc, char** argv){
 	//callbacks
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keeb);
-	gandra.push_back(Pipe(0,0,0,90));
+	pipes.push_back(Pipe(0,0,0,90));
 	
 	glutMainLoop();
 	return 0;
