@@ -8,4 +8,6 @@ Pritiskom na SPACE zaustavlja se cev
 
 Pritiskom na ESC se izlazi iz programa
 
-
+# Instalacija i pokretanje
+Alatom `make` kreira se izvrsni fajl `pipe_up` koji se moze pokrenuti 
+naredbom `./pipe_up`
